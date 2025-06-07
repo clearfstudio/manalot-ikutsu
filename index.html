@@ -25,8 +25,8 @@ body, html {
   aspect-ratio: 16 / 9;
   height: 100%;
   max-height: 95svh;
-  background-color: #ffffff; /* はっきり白に戻す */
-  border: 4px solid #1976d2; /* 濃い青で安心感と視認性 */
+  background-color: #ffffff;
+  border: 4px solid #1976d2;
   border-radius: 20px;
   padding: 20px;
   box-sizing: border-box;
@@ -61,13 +61,13 @@ body, html {
 }
 
 .mode-make {
-  background-color: #42a5f5; /* 青：つくる */
+  background-color: #42a5f5;
 }
 .mode-break {
-  background-color: #ef5350; /* 赤：わける */
+  background-color: #ef5350;
 }
 .mode-random {
-  background-color: #66bb6a; /* 緑：ランダム */
+  background-color: #66bb6a;
 }
 
 .mode-button:hover {
@@ -77,8 +77,8 @@ body, html {
 
 .stage-buttons-wrapper {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3列構成 */
-  gap: 12px 16px; /* 縦横の隙間 */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px 16px;
   max-width: 100%;
   margin-top: 20px;
   padding: 0 10px;
@@ -94,7 +94,7 @@ body, html {
   cursor: pointer;
   box-shadow: 0 3px 5px rgba(0,0,0,0.1);
   transition: transform 0.1s;
-  width: 100%;  /* グリッド幅いっぱいに広げる */
+  width: 100%;
 }
 
 .stage-button:hover {
@@ -115,7 +115,7 @@ body, html {
   width: 400px;
   margin: 30px auto 0;
   margin-top: 20px;
-  display: block; /* 中央寄せのため */
+  display: block;
 }
 .random-start-button:hover {
   transform: scale(1.05);
@@ -149,7 +149,7 @@ body, html {
   vertical-align: middle;
   text-align: center;
   font-size: 1.2em;
-  line-height: 80px;  /* 高さと同じにすると上下中央にくる */
+  line-height: 80px;
   background-color: #fff;
   margin: 0 4px;
   padding: 0;
@@ -158,7 +158,7 @@ body, html {
 
 .number-buttons {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 5列 × 2行構成 */
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   justify-items: center;
   align-items: center;
@@ -327,19 +327,18 @@ body, html {
     let remainingQuestions = [];
     let stageNumber = 0;
     let mode = "";
-    let randomQuestions = []; // ランダム専用の問題配列（モード付き）
-    let currentRandomIndex = 0; // ランダムモードの現在の問題番号
+    let randomQuestions = [];
+    let currentRandomIndex = 0;
 
 
     function showTitleScreen() {
-      console.log("グループデータ:", groupData);
       let currentAnswer = null;
       let currentIndex = null;
       let remainingQuestions = [];
       let stageNumber = 0;
       let mode = "";
-      let randomQuestions = []; // ランダム専用の問題配列（モード付き）
-      let currentRandomIndex = 0; // ランダムモードの現在の問題番号
+      let randomQuestions = [];
+      let currentRandomIndex = 0;
       const container = document.getElementById("game-container");
       container.innerHTML = "";
       container.innerHTML = `
@@ -364,7 +363,6 @@ function startGame(mode) {
   let stageButtonsHTML = "";
   
 if (mode === "random") {
-  // ★ ラッパーなしで直接ボタンを表示！
   stageButtonsHTML = `
     <button class="mode-button random-start-button" onclick="startRandomMode()">ランダムもんだいを<br>はじめる</button>
   `;
@@ -373,7 +371,6 @@ if (mode === "random") {
   for (let i = 5; i <= 10; i++) {
     stageButtonsHTML += `<button class="stage-button" onclick="startStage(${i}, '${mode}')">${i}${label}</button>`;
   }
-  // ★ ラッパーで囲むのはこっちだけ
   stageButtonsHTML = `<div class="stage-buttons-wrapper">${stageButtonsHTML}</div>`;
 }
 
@@ -387,11 +384,9 @@ if (mode === "random") {
 }
 
 function startStage(stageNum, selectedMode) {
-  // グローバルに保存
   stageNumber = stageNum;
   mode = selectedMode;
 
-  // 対応するグループ名（例："グループ5"）
   const groupName = `グループ${stageNumber}`;
   const problems = groupData[groupName];
 
@@ -401,10 +396,8 @@ function startStage(stageNum, selectedMode) {
     return;
   }
 
-  // 残りの問題リストをコピー
   remainingQuestions = [...problems];
 
-  // 最初の問題を表示
   showNextQuestion();
 }
 
@@ -429,7 +422,6 @@ function showNextQuestion() {
 
   currentAnswer = answer;
 
-  // HTML構成（□に入るボックス＝answer-box）
   const container = document.getElementById("game-container");
   container.innerHTML = `
     <div id="game-area" style="text-align:center;">
@@ -450,12 +442,10 @@ function showNextQuestion() {
 }
 
 function checkAnswer(selected) {
-  // □に数字を表示
   document.getElementById("answer-box").textContent = selected;
 
   const resultArea = document.getElementById("judge-area");
 
-  // 🔒 全ての数字ボタンを一時的に無効化
   const buttons = document.querySelectorAll(".number-buttons button");
   buttons.forEach(btn => btn.disabled = true);
 
@@ -463,21 +453,18 @@ function checkAnswer(selected) {
     resultArea.textContent = "◯ せいかい！";
     resultArea.style.color = "green";
 
-    // 問題削除 & 次の問題へ（1秒後）
     remainingQuestions.splice(currentIndex, 1);
-    setTimeout(() => showNextQuestion(), 2000);
+    setTimeout(() => showNextQuestion(), 1500);
   } else {
     resultArea.textContent = "✕ もういちどやってみよう！";
     resultArea.style.color = "red";
 
-    // □をクリア＆ボタン有効化（0.8秒後）
     setTimeout(() => {
       document.getElementById("answer-box").textContent = "";
       resultArea.textContent = "";
 
-      // 🔓 数字ボタンを再度有効化
       buttons.forEach(btn => btn.disabled = false);
-    }, 2000);
+    }, 1500);
   }
 }
 
@@ -487,7 +474,7 @@ function showClearModal() {
 
   document.getElementById("modal-ok-button").onclick = function() {
     document.getElementById("modal-overlay").style.display = "none";
-    showTitleScreen(); // ← タイトル画面に戻る
+    showTitleScreen();
   };
 }
 
@@ -495,7 +482,6 @@ function launchConfetti() {
   const canvas = document.getElementById('confetti-canvas');
   const ctx = canvas.getContext('2d');
 
-  // サイズを画面に合わせる
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
@@ -545,7 +531,6 @@ function launchConfetti() {
 
   loop();
 
-  // 3秒後にアニメーション停止 & canvas非表示
   setTimeout(() => {
     cancelAnimationFrame(animationId);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -553,35 +538,28 @@ function launchConfetti() {
 }
 
 function startRandomMode() {
-  randomQuestions = []; // 初期化
+  randomQuestions = [];
   currentRandomIndex = 0;
 
   const allGroups = ["グループ5", "グループ6", "グループ7", "グループ8", "グループ9", "グループ10"];
   const allProblems = [];
 
-  // 各グループから問題をまとめる
   allGroups.forEach(groupName => {
     const groupNum = parseInt(groupName.replace("グループ", ""));
     groupData[groupName].forEach(pair => {
       allProblems.push({
         pair: pair,
         stage: groupNum,
-        mode: Math.random() < 0.5 ? "make" : "break" // ランダムでモード決定
+        mode: Math.random() < 0.5 ? "make" : "break"
       });
     });
   });
-  console.log("🟡 取得した allProblems の数:", allProblems.length);
 
-  // 重複なしで10問選出
   while (randomQuestions.length < 10 && allProblems.length > 0) {
     const index = Math.floor(Math.random() * allProblems.length);
     randomQuestions.push(allProblems.splice(index, 1)[0]);
   }
 
-  console.log("✅ 選ばれた randomQuestions の数:", randomQuestions.length);
-  console.log("📋 randomQuestions 内容:", randomQuestions);
-
-  // 準備ができたら最初の問題へ
   showNextRandomQuestion();
 }
 
@@ -633,7 +611,7 @@ function checkRandomAnswer(selected) {
     setTimeout(() => {
       currentRandomIndex++;
       showNextRandomQuestion();
-    }, 2000);
+    }, 1500);
   } else {
     resultArea.textContent = "✕ もういちどやってみよう！";
     resultArea.style.color = "red";
@@ -641,7 +619,7 @@ function checkRandomAnswer(selected) {
       document.getElementById("answer-box").textContent = "";
       buttons.forEach(btn => btn.disabled = false);
       resultArea.textContent = "";
-    }, 2000);
+    }, 1500);
   }
 }
 
@@ -655,13 +633,12 @@ document.getElementById("confirm-no").addEventListener("click", () => {
 
 document.getElementById("confirm-yes").addEventListener("click", () => {
   document.getElementById("confirm-modal").classList.add("hidden");
-  showTitleScreen(); // ← 最初の画面に戻る
+  showTitleScreen();
 });
 
 
 
 window.onload = function () {
-  // JSONファイルを取得（同じフォルダ内にある "groupData.json" を読み込む想定）
   fetch('groupData.json')
     .then(response => {
       if (!response.ok) {
@@ -673,7 +650,6 @@ window.onload = function () {
       console.log("グループデータ:", data);
       groupData = data;
 
-      // データ取得が終わった後にタイトル画面を表示
       showTitleScreen();
     })
     .catch(error => {
