@@ -592,7 +592,7 @@ function showNextRandomQuestion() {
       <div class="number-buttons">
         ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button onclick="checkRandomAnswer(${n})">${n}</button>`).join("")}
       </div>
-      <div id="judge-area" style="margin-top:5px; font-size: 2em; font-weight: bold;"></div>
+      <div id="judge-area" style="margin-top:5px; font-size: 2em; font-weight: bold; height: 2em;"></div>
       <button id="back-button-fixed" onclick="showConfirmModal()">もどる</button>
     </div>
   `;
