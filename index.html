@@ -1,1 +1,689 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>いくつといくつ</title>
+  <style>
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100svh;
+  font-family: "Segoe UI", "Helvetica Neue", "Hiragino Kaku Gothic ProN",
+               "ヒラギノ角ゴ ProN W3", "メイリオ", sans-serif;
+  background-color: #e3f2fd; /* 明るめ水色背景で見やすく */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #222; /* 全体の基本文字色を濃く */
+  touch-action: manipulation;
+}
+
+#game-container {
+  width: 100%;
+  max-width: 980px;
+  aspect-ratio: 16 / 9;
+  height: 100%;
+  max-height: 95svh;
+  background-color: #ffffff; /* はっきり白に戻す */
+  border: 4px solid #1976d2; /* 濃い青で安心感と視認性 */
+  border-radius: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+#title-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+}
+
+.mode-button {
+  font-size: 2.2em;
+  padding: 15px 5px;
+  margin: 5px;
+  border-radius: 12px;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  transition: transform 0.1s;
+  font-weight: bold;
+  width: 190px;
+}
+
+.mode-make {
+  background-color: #42a5f5; /* 青：つくる */
+}
+.mode-break {
+  background-color: #ef5350; /* 赤：わける */
+}
+.mode-random {
+  background-color: #66bb6a; /* 緑：ランダム */
+}
+
+.mode-button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.stage-buttons-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3列構成 */
+  gap: 12px 16px; /* 縦横の隙間 */
+  max-width: 100%;
+  margin-top: 20px;
+  padding: 0 10px;
+}
+
+.stage-button {
+  font-size: 2.0em;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #42a5f5;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+  transition: transform 0.1s;
+  width: 100%;  /* グリッド幅いっぱいに広げる */
+}
+
+.stage-button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.random-start-button {
+  font-size: 2.2em;
+  padding: 20px 40px;
+  background-color: #ffa726;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  transition: transform 0.1s, filter 0.1s;
+  width: 400px;
+  margin: 30px auto 0;
+  margin-top: 20px;
+  display: block; /* 中央寄せのため */
+}
+.random-start-button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.back-button {
+  font-size: 1.4em;
+  margin-top: 40px;
+  padding: 10px 24px;
+  background-color: #cccccc;
+  color: #333;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+  transition: transform 0.1s, filter 0.1s;
+}
+
+.back-button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.answer-box {
+  display: inline-block;
+  width: 90px;
+  height: 90px;
+  border: 2px solid #333;
+  border-radius: 4px;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 1.2em;
+  line-height: 80px;  /* 高さと同じにすると上下中央にくる */
+  background-color: #fff;
+  margin: 0 4px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.number-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5列 × 2行構成 */
+  gap: 12px;
+  justify-items: center;
+  align-items: center;
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+.number-buttons button {
+  font-size: 2.3em;
+  padding: 16px;
+  width: 75px;
+  height: 75px;
+  border-radius: 10px;
+  border: none;
+  background-color: #42a5f5;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: transform 0.1s, filter 0.1s;
+}
+
+.number-buttons button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+#modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#modal-box {
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 1.8em;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+#modal-ok-button {
+  margin-top: 20px;
+  padding: 10px 24px;
+  font-size: 1em;
+  font-weight: bold;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#back-button-fixed {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 1000;
+  padding: 8px 14px;
+  font-size: 1em;
+  border: none;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 1.2em;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+#confirm-no {
+  background-color: #eee;
+}
+
+#confirm-yes {
+  background-color: #4caf50;
+  color: white;
+}
+
+  </style>
+</head>
+<body>
+  <div id="game-container">
+  <div style="
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    font-size: 2em;
+    text-align: center;
+    font-weight: bold;
+  ">
+    よみこみちゅう　ちょっとまってね
+  </div>
+  </div>
+  <div id="confirm-modal" class="modal hidden">
+  <div class="modal-content">
+    <p>さいしょにもどりますか？</p>
+    <div class="modal-buttons">
+      <button id="confirm-no">✕ いいえ</button>
+      <button id="confirm-yes">〇 はい</button>
+    </div>
+  </div>
+</div>
+
+  <div id="modal-overlay" style="display: none;">
+  <div id="modal-box">
+    <p id="modal-message">ステージクリアおめでとう！🎉</p>
+    <button id="modal-ok-button">OK</button>
+  </div>
+  <canvas id="confetti-canvas" style="position: fixed; top: 0; left: 0; pointer-events: none; z-index: 10000;"></canvas>
+</div>
+
+  <script>
+    let groupData = {};
+    let currentAnswer = null;
+    let currentIndex = null;
+    let remainingQuestions = [];
+    let stageNumber = 0;
+    let mode = "";
+    let randomQuestions = []; // ランダム専用の問題配列（モード付き）
+    let currentRandomIndex = 0; // ランダムモードの現在の問題番号
+
+
+    function showTitleScreen() {
+      console.log("グループデータ:", groupData);
+      let currentAnswer = null;
+      let currentIndex = null;
+      let remainingQuestions = [];
+      let stageNumber = 0;
+      let mode = "";
+      let randomQuestions = []; // ランダム専用の問題配列（モード付き）
+      let currentRandomIndex = 0; // ランダムモードの現在の問題番号
+      const container = document.getElementById("game-container");
+      container.innerHTML = "";
+      container.innerHTML = `
+        <div id="title-screen">
+          <h1 style="font-size: 3.5em; margin: 0; margin-bottom: 20px;">いくつ と いくつ</h1>
+          <div style="margin-top: 30px;">
+<button class="mode-button mode-make" onclick="startGame('make')">つくる</button>
+<button class="mode-button mode-break" onclick="startGame('break')">わける</button>
+<button class="mode-button mode-random" onclick="startGame('random')">ランダム</button>
+          </div>
+          <div id="credit" style="text-align: center; font-size: 0.8em; color: #888; margin-top: 30px;">
+  まなろっと スタジオ　がくしゅうアプリ
+</div>
+
+        </div>
+      `;
+    }
+
+function startGame(mode) {
+  const container = document.getElementById("game-container");
+
+  let stageButtonsHTML = "";
+  
+if (mode === "random") {
+  // ★ ラッパーなしで直接ボタンを表示！
+  stageButtonsHTML = `
+    <button class="mode-button random-start-button" onclick="startRandomMode()">ランダムもんだいを<br>はじめる</button>
+  `;
+} else {
+  const label = mode === "make" ? "づくり" : "わけ";
+  for (let i = 5; i <= 10; i++) {
+    stageButtonsHTML += `<button class="stage-button" onclick="startStage(${i}, '${mode}')">${i}${label}</button>`;
+  }
+  // ★ ラッパーで囲むのはこっちだけ
+  stageButtonsHTML = `<div class="stage-buttons-wrapper">${stageButtonsHTML}</div>`;
+}
+
+  container.innerHTML = `
+    <div id="stage-select" style="text-align: center;">
+      <h2 style="font-size: 2em;">ステージをえらんでね</h2>
+        ${stageButtonsHTML}
+      <button class="back-button" onclick="showTitleScreen()">もどる</button>
+    </div>
+  `;
+}
+
+function startStage(stageNum, selectedMode) {
+  // グローバルに保存
+  stageNumber = stageNum;
+  mode = selectedMode;
+
+  // 対応するグループ名（例："グループ5"）
+  const groupName = `グループ${stageNumber}`;
+  const problems = groupData[groupName];
+
+  if (!problems || problems.length === 0) {
+    alert("問題データが見つかりません！");
+    showTitleScreen();
+    return;
+  }
+
+  // 残りの問題リストをコピー
+  remainingQuestions = [...problems];
+
+  // 最初の問題を表示
+  showNextQuestion();
+}
+
+function showNextQuestion() {
+  if (remainingQuestions.length === 0) {
+    showClearModal();
+    return;
+  }
+
+  currentIndex = Math.floor(Math.random() * remainingQuestions.length);
+  const [a, b] = remainingQuestions[currentIndex];
+
+  let displayed, answer;
+
+  if (mode === "make") {
+    displayed = a;
+    answer = b;
+  } else if (mode === "break") {
+    displayed = a;
+    answer = b;
+  }
+
+  currentAnswer = answer;
+
+  // HTML構成（□に入るボックス＝answer-box）
+  const container = document.getElementById("game-container");
+  container.innerHTML = `
+    <div id="game-area" style="text-align:center;">
+      <h2 style="font-size: 3em; margin-top: 10px; margin-bottom: 5px;">
+        ${mode === "make" 
+          ? `${displayed} と <span id="answer-box" class="answer-box">　</span> で ${stageNumber}`
+          : `${stageNumber} は ${displayed} と <span id="answer-box" class="answer-box">　</span>`}
+      </h2>
+      
+      <div class="number-buttons" style="margin-top: 20px;">
+        ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button onclick="checkAnswer(${n})">${n}</button>`).join("")}
+      </div>
+
+      <div id="judge-area" style="margin-top:5px; font-size: 2em; font-weight: bold;"></div>
+      <button id="back-button-fixed" onclick="showConfirmModal()">もどる</button>
+    </div>
+  `;
+}
+
+function checkAnswer(selected) {
+  // □に数字を表示
+  document.getElementById("answer-box").textContent = selected;
+
+  const resultArea = document.getElementById("judge-area");
+
+  // 🔒 全ての数字ボタンを一時的に無効化
+  const buttons = document.querySelectorAll(".number-buttons button");
+  buttons.forEach(btn => btn.disabled = true);
+
+  if (selected === currentAnswer) {
+    resultArea.textContent = "◯ せいかい！";
+    resultArea.style.color = "green";
+
+    // 問題削除 & 次の問題へ（1秒後）
+    remainingQuestions.splice(currentIndex, 1);
+    setTimeout(() => showNextQuestion(), 2000);
+  } else {
+    resultArea.textContent = "✕ もういちどやってみよう！";
+    resultArea.style.color = "red";
+
+    // □をクリア＆ボタン有効化（0.8秒後）
+    setTimeout(() => {
+      document.getElementById("answer-box").textContent = "";
+      resultArea.textContent = "";
+
+      // 🔓 数字ボタンを再度有効化
+      buttons.forEach(btn => btn.disabled = false);
+    }, 2000);
+  }
+}
+
+function showClearModal() {
+  document.getElementById("modal-overlay").style.display = "flex";
+  launchConfetti();
+
+  document.getElementById("modal-ok-button").onclick = function() {
+    document.getElementById("modal-overlay").style.display = "none";
+    showTitleScreen(); // ← タイトル画面に戻る
+  };
+}
+
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+
+  // サイズを画面に合わせる
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const confettiCount = 150;
+  const confetti = [];
+
+  for (let i = 0; i < confettiCount; i++) {
+    confetti.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 6 + 4,
+      d: Math.random() * confettiCount,
+      color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+      tilt: Math.random() * 10 - 10,
+      tiltAngleIncremental: Math.random() * 0.07 + 0.05,
+      tiltAngle: 0
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    confetti.forEach((c, i) => {
+      ctx.beginPath();
+      ctx.lineWidth = c.r;
+      ctx.strokeStyle = c.color;
+      ctx.moveTo(c.x + c.tilt + c.r / 2, c.y);
+      ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r / 2);
+      ctx.stroke();
+    });
+    update();
+  }
+
+  function update() {
+    confetti.forEach((c, i) => {
+      c.tiltAngle += c.tiltAngleIncremental;
+      c.y += (Math.cos(c.d) + 3 + c.r / 2) / 2;
+      c.x += Math.sin(0);
+      c.tilt = Math.sin(c.tiltAngle - i) * 15;
+    });
+  }
+
+  let animationId;
+  function loop() {
+    draw();
+    animationId = requestAnimationFrame(loop);
+  }
+
+  loop();
+
+  // 3秒後にアニメーション停止 & canvas非表示
+  setTimeout(() => {
+    cancelAnimationFrame(animationId);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }, 3000);
+}
+
+function startRandomMode() {
+  randomQuestions = []; // 初期化
+  currentRandomIndex = 0;
+
+  const allGroups = ["グループ5", "グループ6", "グループ7", "グループ8", "グループ9", "グループ10"];
+  const allProblems = [];
+
+  // 各グループから問題をまとめる
+  allGroups.forEach(groupName => {
+    const groupNum = parseInt(groupName.replace("グループ", ""));
+    groupData[groupName].forEach(pair => {
+      allProblems.push({
+        pair: pair,
+        stage: groupNum,
+        mode: Math.random() < 0.5 ? "make" : "break" // ランダムでモード決定
+      });
+    });
+  });
+  console.log("🟡 取得した allProblems の数:", allProblems.length);
+
+  // 重複なしで10問選出
+  while (randomQuestions.length < 10 && allProblems.length > 0) {
+    const index = Math.floor(Math.random() * allProblems.length);
+    randomQuestions.push(allProblems.splice(index, 1)[0]);
+  }
+
+  console.log("✅ 選ばれた randomQuestions の数:", randomQuestions.length);
+  console.log("📋 randomQuestions 内容:", randomQuestions);
+
+  // 準備ができたら最初の問題へ
+  showNextRandomQuestion();
+}
+
+function showNextRandomQuestion() {
+  if (currentRandomIndex >= randomQuestions.length) {
+    showClearModal();
+    return;
+  }
+
+  const { pair, stage, mode } = randomQuestions[currentRandomIndex];
+  const [a, b] = pair;
+  let displayed, answer, questionText;
+
+  if (mode === "make") {
+    displayed = a;
+    answer = b;
+    questionText = `${displayed} と <span class="answer-box" id="answer-box"></span> で ${stage}`;
+  } else {
+    displayed = a;
+    answer = b;
+    questionText = `${stage} は ${displayed} と <span class="answer-box" id="answer-box"></span>`;
+  }
+
+  currentAnswer = answer;
+
+  const container = document.getElementById("game-container");
+  container.innerHTML = `
+    <div id="game-area" style="text-align:center;">
+      <h2 style="font-size: 3em; margin-top: 10px; margin-bottom: 5px;">${questionText}</h2>
+      <div class="number-buttons">
+        ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button onclick="checkRandomAnswer(${n})">${n}</button>`).join("")}
+      </div>
+      <div id="judge-area" style="margin-top:5px; font-size: 2em; font-weight: bold;"></div>
+      <button id="back-button-fixed" onclick="showConfirmModal()">もどる</button>
+    </div>
+  `;
+}
+
+function checkRandomAnswer(selected) {
+  document.getElementById("answer-box").textContent = selected;
+
+  const resultArea = document.getElementById("judge-area");
+  const buttons = document.querySelectorAll(".number-buttons button");
+  buttons.forEach(btn => btn.disabled = true);
+
+  if (selected === currentAnswer) {
+    resultArea.textContent = "◯ せいかい！";
+    resultArea.style.color = "green";
+    setTimeout(() => {
+      currentRandomIndex++;
+      showNextRandomQuestion();
+    }, 2000);
+  } else {
+    resultArea.textContent = "✕ もういちどやってみよう！";
+    resultArea.style.color = "red";
+    setTimeout(() => {
+      document.getElementById("answer-box").textContent = "";
+      buttons.forEach(btn => btn.disabled = false);
+      resultArea.textContent = "";
+    }, 2000);
+  }
+}
+
+function showConfirmModal() {
+  document.getElementById("confirm-modal").classList.remove("hidden");
+}
+
+document.getElementById("confirm-no").addEventListener("click", () => {
+  document.getElementById("confirm-modal").classList.add("hidden");
+});
+
+document.getElementById("confirm-yes").addEventListener("click", () => {
+  document.getElementById("confirm-modal").classList.add("hidden");
+  showTitleScreen(); // ← 最初の画面に戻る
+});
+
+
+
+window.onload = function () {
+  // JSONファイルを取得（同じフォルダ内にある "groupData.json" を読み込む想定）
+  fetch('groupData.json')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('ネットワークエラー: ' + response.statusText);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log("グループデータ:", data);
+      groupData = data;
+
+      // データ取得が終わった後にタイトル画面を表示
+      showTitleScreen();
+    })
+    .catch(error => {
+      console.error("データ取得エラー:", error);
+      document.body.innerHTML = `<p style="color:red;">データの読み込みに失敗しました。もう一度読み込んでください。</p>`;
+    });
+};
+
+  </script>
+</body>
+
+</html>
 
